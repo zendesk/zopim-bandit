@@ -9,4 +9,4 @@ echo 'Running Bandit tests'
 bandit -r -f json -x bandit/ -o banditResult.json .
 
 echo 'Results:'
-python bandit/.banditParser.py -o banditResult.json -i bandit.ignore
+python bandit/banditParser.py -o banditResult.json -i bandit.ignore
