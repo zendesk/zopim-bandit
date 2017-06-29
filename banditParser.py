@@ -16,6 +16,8 @@ def issueAttribute(i):
 	issueAttributes += filename
 	testId = i["test_id"]
 	issueAttributes += testId
+	rawCode = i["code"]
+	issueAttributes += rawCode
 	lineRange = i["line_range"]
 	for lineNumber in lineRange:
 		codeExtract = linecache.getline(filename,lineNumber).rstrip().lstrip()
