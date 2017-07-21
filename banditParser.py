@@ -27,29 +27,55 @@ def issueAttribute(i):
 def calculateIssueHash(i):
 	return hash(issueAttribute(i))
 
-def printOutput(issueFingerprint, i):
-	print "===================="
-	print "Issue Fingerprint: " + issueFingerprint
-	print "Issue Severity: %s \t Confidence Level: %s" % (i["issue_severity"], i["issue_confidence"])
-	print "Location: %s"  % i["filename"]
-	print "Issue: %s" % i["issue_text"]
-	print "\nCode: \n%s" % i["code"]
-
-def outputHigh(issueFingerprint, i):
+def scanResult(issueFingerprint, i, issueSeverity):
 	REDC = '\033[31m'
+	YELC = '\033[33m'
+	BLUC = '\033[36m'
 	ENDC = '\033[0m'
-	output = ""
-	output += REDC + "====================\n"
-	output += REDC + "Issue Fingerprint: " + issueFingerprint + "\n"
-	output += REDC + "Issue Severity: %s \t Confidence Level: %s" % (i["issue_severity"], i["issue_confidence"]) + "\n"
-	output += REDC + "Location: %s"  % i["filename"] + "\n"
-	output += REDC + "Issue: %s" % i["issue_text"] + "\n\n"
+
+	if(issueSeverity=="HIGH"):
+		COLOR = REDC
+	elif(issueSeverity=="MEDIUM"):
+		COLOR = YELC
+	else:
+		COLOR = BLUC
+
+	output = "--------------------------------------------------\n"
+	output += COLOR + "Issue Fingerprint: " + issueFingerprint + "\n"
+	output += COLOR + "Issue Severity: %s \t Confidence Level: %s" % (i["issue_severity"], i["issue_confidence"]) + "\n"
+	output += COLOR + "Location: %s"  % i["filename"] + "\n"
+	output += COLOR + "Issue: %s" % i["issue_text"] + "\n\n"
 	output += "Code: \n%s" % i["code"]
 	output += ENDC
 	return output
 
+def scanSummary(data, falsePositiveSignatures):
+	PINKC = '\033[35m'
+	ENDC = '\033[0m'
+	LINEOFCODE = data["metrics"]["_totals"]["loc"]
+	FALSEPOSITIVE = len(falsePositiveSignatures)
+	HIGHSEVERITY = data["metrics"]["_totals"]["SEVERITY.HIGH"]
+	MEDIUMSEVERITY = data["metrics"]["_totals"]["SEVERITY.MEDIUM"]
+	LOWSEVERITY = data["metrics"]["_totals"]["SEVERITY.LOW"]
+	HIGHCONFIDENCE = data["metrics"]["_totals"]["CONFIDENCE.HIGH"]
+	HIGHSEVERITY = data["metrics"]["_totals"]["CONFIDENCE.MEDIUM"]
+	HIGHSEVERITY = data["metrics"]["_totals"]["CONFIDENCE.LOW"]
+
+	output = PINKC + "Code scanned:\n" + ENDC
+	output += "          Total lines of code: %s\n" % (LINEOFCODE)
+	output += "          Total false positives: %s\n" % (FALSEPOSITIVE)
+	output += PINKC + "\nTotal issues (by severity):\n" + ENDC
+	output += "          High: %s\n" % (HIGHSEVERITY)
+	output += "          Medium: %s\n" % (MEDIUMSEVERITY)
+	output += "          Low: %s\n" % (LOWSEVERITY)
+	output += PINKC + "\nTotal issues (by confidence):\n" + ENDC
+	output += "          High: %s\n" % (HIGHCONFIDENCE)
+	output += "          Medium: %s\n" % (MEDIUMSEVERITY)
+	output += "          Low: %s" % (LOWSEVERITY)
+	return output
 
 def main(argv):
+	#Return code to pass/fail travis test
 	exitCode = 0
 
 	parser = argparse.ArgumentParser()
@@ -67,30 +93,26 @@ def main(argv):
 		falsepositive = json.load(file)
 		
 	falsePositiveSignatures = []
+	findings = []
 
 	for i in falsepositive["false_positives"]:
 		falsePositiveSignatures.append(i["fingerprint"])
 
 	for i in data["results"]:
 		issueFingerprint = calculateIssueHash(i)
-		if(i["issue_severity"]=="HIGH" and issueFingerprint not in falsePositiveSignatures):
-			# exitCode = 1;
-			print outputHigh(issueFingerprint, i)
+		if(issueFingerprint not in falsePositiveSignatures):
+			findings.append(i)
 
-	for i in data["results"]:
+	issue_weight = dict(HIGH=0, MEDIUM=1, LOW=2)
+	findings.sort(key=lambda x: issue_weight[x["issue_confidence"]])
+	findings.sort(key=lambda x: issue_weight[x["issue_severity"]])
+
+	for i in findings:
 		issueFingerprint = calculateIssueHash(i)
-		if(i["issue_severity"]=="MEDIUM" and 
-			issueFingerprint not in falsePositiveSignatures):
-			printOutput(issueFingerprint, i)
+		print scanResult(issueFingerprint, i, i["issue_severity"])
 
-	for i in data["results"]:
-		issueFingerprint = calculateIssueHash(i)
-		if(i["issue_severity"]=="LOW" and 
-			issueFingerprint not in falsePositiveSignatures):	
-			printOutput(issueFingerprint, i)
-
+	print scanSummary(data, falsePositiveSignatures)
 	sys.exit(exitCode)
-
 
 if __name__ == "__main__":
     main(sys.argv)
