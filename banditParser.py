@@ -58,8 +58,8 @@ def scanSummary(data, falsePositiveSignatures):
 	MEDIUMSEVERITY = data["metrics"]["_totals"]["SEVERITY.MEDIUM"]
 	LOWSEVERITY = data["metrics"]["_totals"]["SEVERITY.LOW"]
 	HIGHCONFIDENCE = data["metrics"]["_totals"]["CONFIDENCE.HIGH"]
-	HIGHSEVERITY = data["metrics"]["_totals"]["CONFIDENCE.MEDIUM"]
-	HIGHSEVERITY = data["metrics"]["_totals"]["CONFIDENCE.LOW"]
+	MEDIUMCONFIDENCE = data["metrics"]["_totals"]["CONFIDENCE.MEDIUM"]
+	LOWCONFIDENCE = data["metrics"]["_totals"]["CONFIDENCE.LOW"]
 
 	output = PINKC + "Code scanned:\n" + ENDC
 	output += "          Total lines of code: %s\n" % (LINEOFCODE)
@@ -70,8 +70,8 @@ def scanSummary(data, falsePositiveSignatures):
 	output += "          Low: %s\n" % (LOWSEVERITY)
 	output += PINKC + "\nTotal issues (by confidence):\n" + ENDC
 	output += "          High: %s\n" % (HIGHCONFIDENCE)
-	output += "          Medium: %s\n" % (MEDIUMSEVERITY)
-	output += "          Low: %s" % (LOWSEVERITY)
+	output += "          Medium: %s\n" % (MEDIUMCONFIDENCE)
+	output += "          Low: %s" % (LOWCONFIDENCE)
 	return output
 
 def main(argv):
