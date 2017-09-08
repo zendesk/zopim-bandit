@@ -3,7 +3,7 @@
 set -v 
 
 echo 'Installing bandit'
-pip install bandit
+pip install --user bandit
 
 echo 'Running Bandit tests'
 bandit -r --ini .bandit -f json -o banditResult.json .
