@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import json
 import linecache
@@ -110,9 +111,9 @@ def main(argv):
 
 	for i in findings:
 		issueFingerprint = calculateIssueHash(i)
-		print scanResult(issueFingerprint, i, i["issue_severity"])
+		print(scanResult(issueFingerprint, i, i["issue_severity"]))
 
-	print scanSummary(data, falsePositiveSignatures)
+	print(scanSummary(data, falsePositiveSignatures))
 	sys.exit(exitCode)
 
 if __name__ == "__main__":
