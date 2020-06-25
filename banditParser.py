@@ -7,7 +7,7 @@ import argparse
 
 def hash(toHash):
 	hash_object = hashlib.sha256()
-	hash_object.update(toHash)
+	hash_object.update(toHash.encode('utf8'))
 	hex_dig = hash_object.hexdigest()
 	return hex_dig
 
